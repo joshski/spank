@@ -1,0 +1,20 @@
+{
+  "name": "spank",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "connect": "^3.6.0",
+    "express": "^4.15.2",
+    "httpism": "featurist/httpism",
+    "mocha": "^3.2.0"
+  },
+  "dependencies": {
+    "routism": "^1.2.0"
+  }
+}
