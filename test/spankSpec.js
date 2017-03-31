@@ -6,6 +6,56 @@ const express = require('express')
 const SpankAppBuilder = require('../builder')
 const ConnectAdapter = require('../connectAdapter')
 
+describeApps(
+  'GET / => 200 hello world',
+  {
+    express: [
+      app => {
+        app.get('/', function (req, res) {
+          res.send('hello world')
+        })
+      }
+    ],
+    spank: [
+      app => {
+        app.get('/', () => 'hello world')
+      }
+    ]
+  },
+  client => client.get('/', { response: true }),
+  it => it('responds with 200', response => {
+    assert.equal(response.statusCode, 200)
+  }),
+  it => it('responds with hello world', response => {
+    assert.equal(response.body, 'hello world')
+  })
+)
+
+describeApps(
+  'GET /yo/param => 200 hello param',
+  {
+    express: [
+      app => {
+        app.get('/yo/:param', function (req, res) {
+          res.send('hello ' + req.params.param)
+        })
+      }
+    ],
+    spank: [
+      app => {
+        app.get('/yo/:param', req => 'hello ' + req.params.param)
+      }
+    ]
+  },
+  client => client.get('/yo/param', { response: true }),
+  it => it('responds with 200', response => {
+    assert.equal(response.statusCode, 200)
+  }),
+  it => it('responds with hello param', response => {
+    assert.equal(response.body, 'hello param')
+  })
+)
+
 let port = 4100
 
 function describeApps(name, apps, sendRequest) {
@@ -69,53 +119,3 @@ function describeApps(name, apps, sendRequest) {
     })
   })
 }
-
-describeApps(
-  'GET / => 200 hello world',
-  {
-    express: [
-      app => {
-        app.get('/', function (req, res) {
-          res.send('hello world')
-        })
-      }
-    ],
-    spank: [
-      app => {
-        app.get('/', () => 'hello world')
-      }
-    ]
-  },
-  client => client.get('/', { response: true }),
-  it => it('responds with 200', response => {
-    assert.equal(response.statusCode, 200)
-  }),
-  it => it('responds with hello world', response => {
-    assert.equal(response.body, 'hello world')
-  })
-)
-
-describeApps(
-  'GET /yo/param => 200 hello param',
-  {
-    express: [
-      app => {
-        app.get('/yo/:param', function (req, res) {
-          res.send('hello ' + req.params.param)
-        })
-      }
-    ],
-    spank: [
-      app => {
-        app.get('/yo/:param', req => 'hello ' + req.params.param)
-      }
-    ]
-  },
-  client => client.get('/yo/param', { response: true }),
-  it => it('responds with 200', response => {
-    assert.equal(response.statusCode, 200)
-  }),
-  it => it('responds with hello param', response => {
-    assert.equal(response.body, 'hello param')
-  })
-)
