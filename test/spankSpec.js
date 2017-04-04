@@ -32,27 +32,52 @@ describeApps(
 )
 
 describeApps(
-  'GET /yo/param => 200 hello param',
+  'GET /hello/:param => 200 hello world',
   {
     express: [
       app => {
-        app.get('/yo/:param', function (req, res) {
+        app.get('/hello/:param', function (req, res) {
           res.send('hello ' + req.params.param)
         })
       }
     ],
     spank: [
       app => {
-        app.get('/yo/:param', req => 'hello ' + req.params.param)
+        app.get('/hello/:param', req => 'hello ' + req.params.param)
       }
     ]
   },
-  client => client.get('/yo/param', { response: true }),
+  client => client.get('/hello/world', { response: true }),
   it => it('responds with 200', response => {
     assert.equal(response.statusCode, 200)
   }),
-  it => it('responds with hello param', response => {
-    assert.equal(response.body, 'hello param')
+  it => it('responds with hello world', response => {
+    assert.equal(response.body, 'hello world')
+  })
+)
+
+describeApps(
+  'GET /hello?param=world => 200 hello world',
+  {
+    express: [
+      app => {
+        app.get('/hello', function (req, res) {
+          res.send('hello ' + req.query.param)
+        })
+      }
+    ],
+    spank: [
+      app => {
+        app.get('/hello', ({ params }) => 'hello ' + params.param)
+      }
+    ]
+  },
+  client => client.get('/hello?param=world', { response: true }),
+  it => it('responds with 200', response => {
+    assert.equal(response.statusCode, 200)
+  }),
+  it => it('responds with hello world', response => {
+    assert.equal(response.body, 'hello world')
   })
 )
 

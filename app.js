@@ -4,14 +4,14 @@ function SpankApp(routes) {
   this.router = routism.compile(routes)
 }
 
-SpankApp.prototype.respond = function (url, methodName) {
-  const recognition = this.router.recognise(url)
+SpankApp.prototype.respond = function (request) {
+  const recognition = this.router.recognise(request.path)
   if (recognition) {
-    const method = recognition.route[methodName.toLowerCase()]
+    const method = recognition.route[request.method.toLowerCase()]
     if (method) {
       const params = recognition.params.reduce((params, pair) => {
         params[pair[0]] = pair[1]; return params
-      }, {})
+      }, request.params)
       const result = method({ params })
       if (typeof result === 'string') {
         return {
