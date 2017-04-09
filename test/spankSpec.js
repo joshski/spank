@@ -156,6 +156,35 @@ describeApps(
   })
 )
 
+describeApps(
+  'GET /delay/1 => 200 hello world (after 1ms)',
+  {
+    express: [
+      app => {
+        app.get('/delay/1', function (req, res) {
+          setTimeout(function () {
+            res.send('hello world')
+          }, 1)
+        })
+      }
+    ],
+    spank: [
+      app => {
+        app.get('/delay/1', () => new Promise(function(resolve) {
+          setTimeout(() => resolve('hello world'), 1)
+        }))
+      }
+    ]
+  },
+  client => client.get('/delay/1', { response: true }),
+  it => it('responds with 200', response => {
+    assert.equal(response.statusCode, 200)
+  }),
+  it => it('responds with hello world', response => {
+    assert.equal(response.body, 'hello world')
+  })
+)
+
 let port = 4100
 
 function describeApps(name, apps, sendRequest) {

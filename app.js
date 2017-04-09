@@ -23,6 +23,14 @@ SpankApp.prototype.respond = function (request) {
           body: result,
           headers: { 'content-type': 'text/plain' }
         }
+      } else if (typeof result.then === 'function') {
+        return result.then(function (r) {
+          return {
+            status: 200,
+            body: r,
+            headers: { 'content-type': 'text/plain' }
+          }
+        })
       }
     }
   }
