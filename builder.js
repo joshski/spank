@@ -14,7 +14,7 @@ SpankAppBuilder.prototype.get = function(pattern, handler) {
     }
     this.handlers.push(patternHandler)
   }
-  patternHandler.route.get = handler
+  patternHandler.route.GET = handler
 }
 
 SpankAppBuilder.prototype.build = function() {

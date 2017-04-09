@@ -11,7 +11,7 @@ SpankApp.prototype.respond = function (request) {
   const requestParams = this.paramsFromUrl(url)
   const recognition = this.router.recognise(url.pathname)
   if (recognition) {
-    const method = recognition.route[request.method.toLowerCase()]
+    const method = recognition.route[request.method]
     if (method) {
       const params = recognition.params.reduce((params, pair) => {
         params[pair[0]] = pair[1]; return params
