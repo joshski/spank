@@ -1,4 +1,5 @@
 const { parse } = require('url')
+const querystring = require('querystring')
 
 function ConnectAdapter() {}
 
@@ -16,11 +17,7 @@ ConnectAdapter.prototype.connectify = function(spankApp) {
 }
 
 ConnectAdapter.prototype.paramsFromUrl = function (url) {
-  return url.query ? url.query.split('&').reduce((p, pair) => {
-    const kv = pair.split('=')
-    p[kv[0]] = kv[1]
-    return p
-  }, {}) : {}
+  return url.query ? querystring.parse(url.query) : {}
 }
 
 module.exports = ConnectAdapter

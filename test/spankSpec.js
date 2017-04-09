@@ -81,6 +81,56 @@ describeApps(
   })
 )
 
+describeApps(
+  'GET /hello?p=1&p=2 => 200 hello ["1","2"]',
+  {
+    express: [
+      app => {
+        app.get('/hello', function (req, res) {
+          res.send('hello ' + JSON.stringify(req.query.p))
+        })
+      }
+    ],
+    spank: [
+      app => {
+        app.get('/hello', ({ params }) => 'hello ' + JSON.stringify(params.p))
+      }
+    ]
+  },
+  client => client.get('/hello?p=1&p=2', { response: true }),
+  it => it('responds with 200', response => {
+    assert.equal(response.statusCode, 200)
+  }),
+  it => it('responds with hello ["1","2"]', response => {
+    assert.equal(response.body, 'hello ["1","2"]')
+  })
+)
+
+describeApps(
+  'GET /say?p=hello+world => 200 hello world',
+  {
+    express: [
+      app => {
+        app.get('/say', function (req, res) {
+          res.send(req.query.p)
+        })
+      }
+    ],
+    spank: [
+      app => {
+        app.get('/say', ({ params }) => params.p)
+      }
+    ]
+  },
+  client => client.get('/say?p=hello+world', { response: true }),
+  it => it('responds with 200', response => {
+    assert.equal(response.statusCode, 200)
+  }),
+  it => it('responds with hello world', response => {
+    assert.equal(response.body, 'hello world')
+  })
+)
+
 let port = 4100
 
 function describeApps(name, apps, sendRequest) {
