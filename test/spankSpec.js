@@ -131,6 +131,31 @@ describeApps(
   })
 )
 
+describeApps(
+  'GET /hello%20world => 200 hello world',
+  {
+    express: [
+      app => {
+        app.get('/:param', function (req, res) {
+          res.send(req.params.param)
+        })
+      }
+    ],
+    spank: [
+      app => {
+        app.get('/:param', ({ params }) => params.param)
+      }
+    ]
+  },
+  client => client.get('/hello%20world', { response: true }),
+  it => it('responds with 200', response => {
+    assert.equal(response.statusCode, 200)
+  }),
+  it => it('responds with hello world', response => {
+    assert.equal(response.body, 'hello world')
+  })
+)
+
 let port = 4100
 
 function describeApps(name, apps, sendRequest) {
