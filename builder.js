@@ -1,24 +1,39 @@
 const SpankApp = require('./app')
 
 function SpankAppBuilder() {
-  this.handlersByPattern = {}
-  this.handlers = []
+  this.routesByPattern = {}
+  this.routes = []
+  this.mounts = []
 }
 
-SpankAppBuilder.prototype.get = function(pattern, handler) {
-  let patternHandler = this.handlersByPattern[pattern]
-  if (!patternHandler) {
-    patternHandler = this.handlersByPattern[pattern] = {
-      pattern,
-      route: {}
-    }
-    this.handlers.push(patternHandler)
+SpankAppBuilder.prototype.get = function (pattern, route) {
+  this.findOrCreateRouteForPattern(pattern).route.GET = route
+}
+
+SpankAppBuilder.prototype.findOrCreateRouteForPattern = function (pattern) {
+  var routeEntry = this.routesByPattern[pattern]
+  if (!routeEntry) {
+    routeEntry = this.routesByPattern[pattern] = { pattern, route: {} }
+    this.routes.push(routeEntry)
   }
-  patternHandler.route.GET = handler
+  return routeEntry
+}
+
+SpankAppBuilder.prototype.use = function (path, builder) {
+  this.mounts.push({ path, builder })
 }
 
 SpankAppBuilder.prototype.build = function() {
-  return new SpankApp(this.handlers)
+  var finalRoutes = Object.assign(this.routes, [])
+  for (var i = 0; i < this.mounts.length; i++) {
+    var mount = this.mounts[i]
+    for (var j = 0; j < mount.builder.routes.length; j++) {
+      var mountedRouteEntry = Object.assign(mount.builder.routes[i], {})
+      mountedRouteEntry.pattern = mount.path + mountedRouteEntry.pattern
+      finalRoutes.push(mountedRouteEntry)
+    }
+  }
+  return new SpankApp(finalRoutes)
 }
 
 module.exports = SpankAppBuilder

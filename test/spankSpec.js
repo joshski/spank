@@ -6,6 +6,8 @@ const express = require('express')
 const SpankAppBuilder = require('../builder')
 const ConnectAdapter = require('../connectAdapter')
 
+const spank = () => new SpankAppBuilder()
+
 describeApps(
   'GET / => 200 hello world',
   {
@@ -185,6 +187,65 @@ describeApps(
   })
 )
 
+describeApps(
+  'GET /json => 200 { "hello": "world" }',
+  {
+    express: [
+      app => {
+        app.get('/json', function (req, res) {
+          res.json({ hello: 'world' })
+        })
+      }
+    ],
+    spank: [
+      app => {
+        app.get('/json', () => ({ hello: 'world' }))
+      }
+    ]
+  },
+  client => client.get('/json', { response: true }),
+  it => it('responds with 200', response => {
+    assert.equal(response.statusCode, 200)
+  }),
+  it => it('responds with hello world', response => {
+    assert.deepEqual(response.body, { hello: 'world' })
+  })
+)
+
+describeApps(
+  'GET /admin/hello/world => 200 hello world',
+  {
+    express: [
+      app => {
+        const admin = express()
+
+        admin.get('/hello/world', function (req, res) {
+          res.send('hello world')
+        })
+
+        app.use('/admin', admin)
+      }
+    ],
+    spank: [
+      app => {
+        const admin = spank()
+
+        admin.get('/hello/world', () => 'hello world')
+
+        app.use('/admin', admin)
+      }
+    ]
+  },
+  client => client.get('/admin/hello/world', { response: true }),
+  it => it('responds with 200', response => {
+    assert.equal(response.statusCode, 200)
+  }),
+  it => it('responds with hello world', response => {
+    assert.deepEqual(response.body, 'hello world')
+  })
+)
+
+
 let port = 4100
 
 function describeApps(name, apps, sendRequest) {
@@ -233,7 +294,7 @@ function describeApps(name, apps, sendRequest) {
       apps.spank.forEach(spankAppSpec => {
         beforeEach(function (listening) {
           const connectApp = connect()
-          const spankAppBuilder = new SpankAppBuilder()
+          const spankAppBuilder = spank()
           spankAppSpec(spankAppBuilder)
           const spankApp = spankAppBuilder.build()
           const adapter = new ConnectAdapter()

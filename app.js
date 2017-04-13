@@ -17,24 +17,39 @@ SpankApp.prototype.respond = function (request) {
         params[pair[0]] = pair[1]; return params
       }, requestParams)
       const result = method({ params })
-      if (typeof result === 'string') {
-        return {
-          status: 200,
-          body: result,
-          headers: { 'content-type': 'text/plain' }
-        }
-      } else if (typeof result.then === 'function') {
-        return result.then(function (r) {
-          return {
-            status: 200,
-            body: r,
-            headers: { 'content-type': 'text/plain' }
-          }
-        })
-      }
+      return this.respondWithRouteResult(result)
     }
   }
-  return { status: 404 }
+  return this.respondWithNotFound()
+}
+
+SpankApp.prototype.respondWithRouteResult = function (result) {
+  if (typeof result === 'string') {
+    return Promise.resolve({
+      status: 200,
+      body: result,
+      headers: { 'content-type': 'text/plain' }
+    })
+  } else if (typeof result.then === 'function') {
+    return result.then(function (r) {
+      return {
+        status: 200,
+        body: r,
+        headers: { 'content-type': 'text/plain' }
+      }
+    })
+  } else if (typeof result === 'object') {
+    return Promise.resolve({
+      status: 200,
+      body: JSON.stringify(result),
+      headers: { 'content-type': 'application/json' }
+    })
+  }
+  return this.respondWithNotFound()
+}
+
+SpankApp.prototype.respondWithNotFound = function () {
+  return Promise.resolve({ status: 404 })
 }
 
 SpankApp.prototype.paramsFromUrl = function (url) {
