@@ -2,8 +2,8 @@ const routism = require('routism')
 const parseURL = require('url').parse
 const querystring = require('querystring')
 
-function SpankApp(routes) {
-  this.router = routism.compile(routes)
+function SpankApp(routings) {
+  this.router = routism.compile(routings)
 }
 
 SpankApp.prototype.respond = function (request) {
