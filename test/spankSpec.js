@@ -218,21 +218,25 @@ describeApps(
     express: [
       app => {
         const admin = express()
-
-        admin.get('/hello/world', function (req, res) {
-          res.send('hello world')
-        })
-
+        admin.get('/hello/world', (req, res) => res.send('hello world'))
         app.use('/admin', admin)
+      },
+      app => {
+        const admin = express()
+        app.use('/admin', admin)
+        admin.get('/hello/world', (req, res) => res.send('hello world'))
       }
     ],
     spank: [
       app => {
         const admin = spank()
-
         admin.get('/hello/world', () => 'hello world')
-
         app.use('/admin', admin)
+      },
+      app => {
+        const admin = spank()
+        app.use('/admin', admin)
+        admin.get('/hello/world', () => 'hello world')
       }
     ]
   },
@@ -259,6 +263,10 @@ function describeApps(name, apps, sendRequest) {
     return mapped
   })
 
+  describeAppsWithSpecs(name, apps, specs, sendRequest)
+}
+
+function describeAppsWithSpecs(name, apps, specs, sendRequest) {
   function runSpecs() {
     specs.forEach(spec => {
       it(spec.name, function () {
@@ -271,23 +279,19 @@ function describeApps(name, apps, sendRequest) {
   }
 
   describe(name, function() {
-    beforeEach(function() {
-      this.port = ++port
-      this.client = httpism.client(`http://localhost:${this.port}`)
-    })
-
     describe('express', function () {
       apps.express.forEach(expressAppSpec => {
         beforeEach(function (listening) {
           const app = express()
           expressAppSpec(app)
+          this.port = ++port
+          this.client = httpism.client(`http://localhost:${this.port}`)
           app.listen(this.port, function (err) {
             listening(err)
           })
         })
+        runSpecs()
       })
-
-      runSpecs()
     })
 
     describe('spank', function () {
@@ -299,13 +303,14 @@ function describeApps(name, apps, sendRequest) {
           const spankApp = spankAppBuilder.build()
           const adapter = new ConnectAdapter()
           connectApp.use(adapter.connectify(spankApp))
+          this.port = ++port
+          this.client = httpism.client(`http://localhost:${this.port}`)
           connectApp.listen(this.port, function (err) {
             listening(err)
           })
         })
+        runSpecs()
       })
-
-      runSpecs()
     })
   })
 }
