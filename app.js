@@ -26,21 +26,21 @@ SpankApp.prototype.respond = function (request) {
 SpankApp.prototype.respondWithRouteResult = function (result) {
   if (typeof result === 'string') {
     return Promise.resolve({
-      status: 200,
+      statusCode: 200,
       body: result,
       headers: { 'content-type': 'text/plain' }
     })
   } else if (typeof result.then === 'function') {
     return result.then(function (r) {
       return {
-        status: 200,
+        statusCode: 200,
         body: r,
         headers: { 'content-type': 'text/plain' }
       }
     })
   } else if (typeof result === 'object') {
     return Promise.resolve({
-      status: 200,
+      statusCode: 200,
       body: JSON.stringify(result),
       headers: { 'content-type': 'application/json' }
     })

@@ -5,7 +5,7 @@ ConnectAdapter.prototype.connectify = function(spankApp) {
     const spankRequest = { method: request.method, url: request.url }
     spankApp.respond(spankRequest)
       .then(function (r) {
-        response.writeHead(r.status, r.headers)
+        response.writeHead(r.statusCode, r.headers)
         response.end(r.body)
       })
   }

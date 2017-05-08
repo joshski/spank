@@ -249,6 +249,24 @@ describeApps(
   })
 )
 
+class SpankClient {
+  constructor(app) {
+    this.app = app
+  }
+
+  get(url) {
+    const request = {
+      method: 'GET',
+      url: url
+    }
+    return this.app.respond(request).then(response => {
+      if (response.headers['content-type'] == 'application/json') {
+        response.body = JSON.parse(response.body)
+      }
+      return response
+    })
+  }
+}
 
 let port = 4100
 
@@ -294,7 +312,7 @@ function describeAppsWithSpecs(name, apps, specs, sendRequest) {
       })
     })
 
-    describe('spank', function () {
+    describe('spank (connect)', function () {
       apps.spank.forEach(spankAppSpec => {
         beforeEach(function (listening) {
           const connectApp = connect()
@@ -308,6 +326,18 @@ function describeAppsWithSpecs(name, apps, specs, sendRequest) {
           connectApp.listen(this.port, function (err) {
             listening(err)
           })
+        })
+        runSpecs()
+      })
+    })
+
+    describe('spank (direct)', function () {
+      apps.spank.forEach(spankAppSpec => {
+        beforeEach(function () {
+          const spankAppBuilder = spank()
+          spankAppSpec(spankAppBuilder)
+          const spankApp = spankAppBuilder.build()
+          this.client = new SpankClient(spankApp)
         })
         runSpecs()
       })
